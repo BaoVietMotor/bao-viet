@@ -1,0 +1,21 @@
+{
+  "name": "bao-viet-web",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Official website and pre-order system for Bảo Việt Motor, a sealed flood enclosure for motorcycles that ties down to the floor.",
+  "type": "module",
+  "license": "UNLICENSED",
+  "author": "Bao (Simba) Nguyen",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node --test --experimental-sqlite \"test/*.test.mjs\"",
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^4.45.0"
+  }
+}

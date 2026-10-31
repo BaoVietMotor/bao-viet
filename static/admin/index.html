@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Admin | Bảo Việt Motor</title>
+<link rel="icon" href="/favicon.ico">
+<link rel="stylesheet" href="/css/site.css?v=__V__">
+<style>
+  body { background: var(--paper); }
+  .admin-top { background: rgba(5, 6, 10, .94); color: #fff; border-bottom: 1px solid var(--line); position: relative; z-index: 2; }
+  .admin-top .wrap { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 12px; }
+  .admin-top b { letter-spacing: .12em; }
+  main.wrap { position: relative; z-index: 2; }
+  .login { max-width: 420px; margin: 10vh auto; }
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  @media (max-width: 760px) { .kpis { grid-template-columns: repeat(2, 1fr); } }
+  .kpi { background: linear-gradient(160deg, rgba(24, 27, 37, .9), rgba(10, 12, 18, .9)); border: 1px solid var(--line); border-radius: 6px; padding: 16px 18px; }
+  .kpi b { display: block; font-size: 1.8rem; letter-spacing: -.03em; color: var(--yellow); }
+  .kpi span { font-size: .78rem; color: #9aa0b0; text-transform: uppercase; letter-spacing: .1em; font-weight: 700; }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; margin: 22px 0 14px; }
+  .toolbar .field { min-width: 150px; }
+  .toolbar input, .toolbar select { padding: 9px 11px; }
+  table.subs { width: 100%; border-collapse: collapse; background: rgba(12, 14, 20, .92); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; font-size: .9rem; }
+  .subs th, .subs td { padding: 10px 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+  .subs th { background: #12141c; color: #9aa0b0; font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; }
+  .subs tr.detail td { background: #0a0c12; }
+  .subs .mono { font-family: var(--mono); }
+  .st { display: inline-block; padding: 2px 9px; border-radius: 99px; font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; border: 1px solid; }
+  .st-new { background: rgba(255, 196, 0, .12); color: var(--yellow); }
+  .st-contacted { background: rgba(59, 130, 246, .14); color: #93c5fd; }
+  .st-confirmed { background: rgba(52, 211, 153, .14); color: #6ee7b7; }
+  .st-cancelled { background: rgba(225, 20, 20, .14); color: #fca5a5; }
+  .st-done { background: rgba(255, 255, 255, .06); color: #c3c8d4; }
+  .row-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
+  .row-actions select, .row-actions textarea { padding: 8px 10px; border: 1px solid #3b4050; border-radius: 4px; background: rgba(5, 6, 10, .72); color: #fff; }
+  .row-actions textarea { width: min(100%, 520px); min-height: 60px; }
+  .btn-xs { padding: 8px 12px; font-size: .66rem; }
+  .btn-danger { background: #b91c1c; color: #fff; }
+  .muted { color: #9aa0b0; }
+  .pager { display: flex; gap: 10px; align-items: center; margin-top: 14px; }
+  .empty { padding: 40px; text-align: center; color: #9aa0b0; background: rgba(12, 14, 20, .8); border: 1px dashed var(--line); border-radius: 6px; }
+  .bar-row { display: grid; grid-template-columns: 140px 1fr 60px; gap: 10px; align-items: center; font-size: .86rem; margin: 6px 0; }
+  .bar-row i { display: block; height: 10px; background: linear-gradient(90deg, var(--yellow), var(--amber)); border-radius: 99px; }
+  code { color: var(--yellow); }
+</style>
+</head>
+<body>
+<header class="admin-top"><div class="wrap"><b>BẢO VIỆT MOTOR · ADMIN</b><span><a href="/" style="color:#cfd2da;margin-right:14px">View site</a><button id="logout" class="btn btn-ghost btn-xs" hidden>Log out</button></span></div></header>
+
+<main class="wrap" style="padding-bottom:60px">
+  <section id="loginView" class="login" style="padding:0">
+    <div class="form-wrap">
+      <h1 class="h3">Sign in</h1>
+      <p class="small">Enter the <code>ADMIN_PASSWORD</code> you set in Cloudflare. It is kept only for this browser tab.</p>
+      <form id="loginForm" class="form">
+        <div class="field"><label for="pw">Password</label><input id="pw" type="password" autocomplete="current-password" required minlength="12"></div>
+        <div class="form-status" id="loginStatus" role="alert"></div>
+        <button class="btn btn-primary" type="submit">Sign in</button>
+      </form>
+    </div>
+  </section>
+
+  <section id="appView" hidden style="padding:28px 0 0">
+    <div class="kpis">
+      <div class="kpi"><b id="kPre">...</b><span>Pre-orders</span></div>
+      <div class="kpi"><b id="kUnits">...</b><span>Units (excl. cancelled)</span></div>
+      <div class="kpi"><b id="kMsg">...</b><span>Messages</span></div>
+      <div class="kpi"><b id="kNew">...</b><span>Not yet handled</span></div>
+    </div>
+    <div class="grid g2 mt-s">
+      <div class="kpi"><span>Pre-orders by status</span><div id="byStatus" class="mt-s small"></div></div>
+      <div class="kpi"><span>Units by province (top 10)</span><div id="byProvince" class="mt-s"></div></div>
+    </div>
+
+    <form class="toolbar" id="filters">
+      <div class="field"><label for="fType">Type</label><select id="fType"><option value="">All</option><option value="preorder">Pre-orders</option><option value="contact">Messages</option></select></div>
+      <div class="field"><label for="fStatus">Status</label><select id="fStatus"><option value="">All</option><option>new</option><option>contacted</option><option>confirmed</option><option>cancelled</option><option>done</option></select></div>
+      <div class="field" style="flex:1"><label for="fQ">Search</label><input id="fQ" placeholder="Name, phone, email, ref, province"></div>
+      <button class="btn btn-primary btn-xs" type="submit">Apply</button>
+      <button class="btn btn-outline btn-xs" type="button" id="exportBtn">Export CSV</button>
+      <button class="btn btn-outline btn-xs" type="button" id="refreshBtn">Refresh</button>
+    </form>
+    <div class="form-status" id="appStatus" role="alert"></div>
+    <div id="tableWrap"></div>
+    <div class="pager"><button class="btn btn-outline btn-xs" id="prev">← Newer</button><span id="pageInfo" class="small"></span><button class="btn btn-outline btn-xs" id="next">Older →</button></div>
+    <p class="tiny mt">Personal data shown here is covered by the site's privacy policy. Delete a record when a customer asks for erasure, and remove records older than 24 months.</p>
+  </section>
+</main>
+<script src="/js/admin.js?v=__V__" defer></script>
+</body>
+</html>

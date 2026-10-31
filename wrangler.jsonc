@@ -1,0 +1,39 @@
+// Cloudflare Workers configuration.
+// Deploy: connect this GitHub repo in Cloudflare → Workers & Pages → Create → Import a repository.
+// Cloudflare runs `npx wrangler deploy`, which first runs the build command below.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "bao-viet",
+  "main": "src/worker/index.js",
+  "compatibility_date": "2025-10-01",
+
+  // Generate the static site (./public) before every deploy.
+  "build": { "command": "node build.mjs" },
+
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    // Pages, API, video and admin go through the Worker (security headers, database, canonical URLs).
+    // Images, CSS and JS are served straight from Cloudflare's cache, with headers from static/_headers.
+    "run_worker_first": ["/*", "!/img/*", "!/css/*", "!/js/*"],
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page"
+  },
+
+  // D1 (SQLite) database for pre-orders and messages.
+  // With Wrangler 4.45+ the database is created automatically on first deploy, so no ID is needed.
+  "d1_databases": [
+    { "binding": "DB", "database_name": "bao-viet-db" }
+  ],
+
+  // Optional: set SITE_URL to your custom domain (e.g. "https://baoviet.vn") once you have one,
+  // so canonical links point there. Leave empty to use whatever domain the request came in on.
+  "vars": { "SITE_URL": "" },
+
+  // Secrets are NOT stored here. Add them in the Cloudflare dashboard → your Worker → Settings → Variables and Secrets:
+  //   ADMIN_PASSWORD            (required for /admin, at least 12 characters)
+  //   GOOGLE_SITE_VERIFICATION  (optional, the token from Google Search Console)
+  //   RESEND_API_KEY, NOTIFY_EMAIL, NOTIFY_FROM  (optional, email alerts for new orders)
+
+  "observability": { "enabled": true }
+}
